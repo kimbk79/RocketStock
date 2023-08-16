@@ -9,15 +9,18 @@ import logging
 from sqlalchemy.orm import sessionmaker
 
 import sys
+sys.path.append("../config")  # 상위 폴더 추가
+from logging_config import configure_logging
 
 sys.path.append("..")  # 상위 폴더 추가
 from models import StockUS, StockId, Base, engine
 
+# get setting logging info
+configure_logging()
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
-logging.basicConfig(filename='us.log', level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 ## get us sockets
 def get_lately_us_stock_list(market):
@@ -29,7 +32,7 @@ def get_lately_us_stock_list(market):
         return us_stock_list
             
     except Exception as e:
-        print(f"us 종목 조회 실패: {e}")
+        logging.error(f"us 종목 조회 실패: {e}")
         return None
 
 
@@ -71,7 +74,7 @@ def db_insert_us_stock_list(uslist, market):
                 industryCode = row['IndustryCode']
 
             if new_sid != None:
-                print(f"add stock info ------- {new_sid}, {row['Symbol']}, {row['Name']}, {row['Industry']}, {row['IndustryCode']}")
+                logging.info(f"add stock info ------- {new_sid}, {row['Symbol']}, {row['Name']}, {row['Industry']}, {row['IndustryCode']}")
                 insert_stock_us( session=session,
                                 sid=new_sid,
                                 stock_code=row['Symbol'],  
@@ -81,7 +84,7 @@ def db_insert_us_stock_list(uslist, market):
                                 market=21)   
                 
         except Exception as e:
-            print(f"error db_insert_us_stock_list {e}")
+            logging.error(f"error db_insert_us_stock_list {e}")
             session.rollback()
         
         session.close()
