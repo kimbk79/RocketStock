@@ -3,18 +3,26 @@ import time
 import numpy as np
 from datetime import datetime
 import logging
-import sys
 
 import yfinance as yf
 from sqlalchemy.orm import sessionmaker
 
-sys.path.append("..")  # 상위 폴더 추가
+import sys
+sys.path.append("../config")  
+from logging_config import configure_logging
+
+sys.path.append("..")  
 from models import StockUS, StockUSOHLC, Base, engine
+
+
+# get setting logging info
+configure_logging()
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
-def get_us_stock_list():
+## get ohlc information of tickers
+def get_us_ohlc_of_ticker():
     
     stocks = session.query(StockUS).all()
     for index, stock in enumerate(stocks, start=1):
@@ -37,20 +45,15 @@ def get_us_stock_list():
         index_of_space = stock.stock_code.find(' ')  # 첫 번째 공백의 인덱스 찾기
         if index_of_space != -1:
             stock.stock_code = stock.stock_code[:index_of_space]  # 공백 이전까지의 문자만 선택
-    
-        
-        #if index == 320 or index == 616 or index == 858 or index == 898:
-        #    continue    
-        
+            
         if latest_ohlc is not None:
             start_str = latest_ohlc.ohlc_dt            
             
         tohlcs = yf.download(stock.stock_code, start=start_str, end=end_str)
             
-        print(f"========================================> START code: {stock.stock_code}, sid: {stock.sid}, {index}/{len(stocks)}")     
+        logging.error(f"=============== START code: {stock.stock_code}, sid: {stock.sid}, {index}/{len(stocks)} ===============")     
         
-           
-        
+                           
         records = []      
         is_latenty = False
         for index, row in tohlcs.iterrows():
@@ -58,7 +61,7 @@ def get_us_stock_list():
             open_price = row['Open']
             
             row.fillna(0.0)
-            print(f"Stock Code: {stock.sid}, date: {date}, open_price: {open_price} close_price: {row['Close']}")   
+            logging.info(f"code: {stock.sid}, date: {date}, open_price: {open_price} close_price: {row['Close']}")   
             
             ## nan 값이 발생 할 경우
             if (row['Open'] == float('nan')) or (row['Close'] == float('nan')):
@@ -72,8 +75,7 @@ def get_us_stock_list():
                                 
                 per_change = 0.0                
                 ## open 0.0 일 경우 per 계산 오류 예외처리
-                if float(row['Open']) != 0.0:
-                    print(f"compute open {stock.sid}, {float(row['Open'])}")
+                if float(row['Open']) != 0.0:                
                     per_change = (row['Close'] - row['Open']) / row['Open'] * 100
                     
                 if  row['Open'] != 0.0:
@@ -89,12 +91,12 @@ def get_us_stock_list():
                     
                     records.append(new_record)
             else:
-                print(f"-------------- already insert {stock.sid}, {index.strftime('%Y-%m-%d')}")
-        
-        print(f"start bulk  {stock.sid}")
+                logging.info(f"-- Already Insert {stock.sid}, {index.strftime('%Y-%m-%d')}")
+                
         session.bulk_save_objects(records)        
-        session.commit()
-        print(f"end bulk  {stock.sid}")
+        session.commit()        
 
-session.close()
-get_us_stock_list()
+    session.close()
+    
+    
+get_us_ohlc_of_ticker()

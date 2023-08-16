@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, SmallInteger, func, BigInteger, Float
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, SmallInteger, func, BigInteger, Float, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from db_config_info import db_config
+from config.db_config_info import db_config
 
 engine = create_engine(f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}/{db_config['database']}")
 Session = sessionmaker(bind=engine)
@@ -47,3 +47,17 @@ class StockUSOHLC(Base):
     change = Column(Float)
     per_change = Column(Float)
     reg_date = Column(DateTime, server_default=func.now())
+    
+    
+class StockUsRSI(Base):
+    __tablename__ = 'tb_stock_us_rsi'
+
+    sid = Column(BigInteger, nullable=False)
+    rsi_date = Column(String(20))
+    rsi7 = Column(Float)
+    rsi14 = Column(Float)
+    rsi24 = Column(Float)
+    reg_date = Column(DateTime, server_default=func.now())
+    
+    # Composite primary key constraint
+    PrimaryKeyConstraint(sid, rsi_date)
