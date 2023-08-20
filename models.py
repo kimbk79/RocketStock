@@ -61,3 +61,16 @@ class StockUsRSI(Base):
     
     # Composite primary key constraint
     PrimaryKeyConstraint(sid, rsi_date)
+    
+class StockUsMACD(Base):
+    __tablename__ = 'tb_stock_us_macd'
+
+    sid = Column(BigInteger, nullable=False)
+    macd9 = Column(Float)
+    macd12 = Column(Float)
+    macd26 = Column(Float)
+    macd_date = Column(String(20), primary_key=True)
+    reg_date = Column(DateTime, default=func.now())
+
+    # Composite primary key constraint
+    PrimaryKeyConstraint(sid, macd_date)
