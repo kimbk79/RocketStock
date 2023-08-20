@@ -2,6 +2,6 @@
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'qhrrl',
-    'database': 'STOCK_DB'
+    'password': '',
+    'database': ''
 }
