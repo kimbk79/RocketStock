@@ -46,7 +46,7 @@ def get_us_macd_of_ticker():
         # Insert StockUsMACD 데이터 삽입
         macd_list = []
         records = []
-        for i in range(len(ohlc_data)):
+        for i in range(len(ohlc_data)):            
             close_price = ohlc_data[i].close
     
             if i >= long_period:
@@ -66,8 +66,9 @@ def get_us_macd_of_ticker():
                         macd9=macd9,
                         macd12=ema12,
                         macd26=ema26,
-                        macd_date=ohlc_data[i].ohlc_dt
+                        macd_dt=ohlc_data[i].ohlc_dt
                     )
+                    print(f"###################### MACD [code: {stock.stock_code}, date: {ohlc_data[i].ohlc_dt} , {macd_record.macd_dt}===============")     
                     records.append(macd_record)
                     #session.commit()
                             

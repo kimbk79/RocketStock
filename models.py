@@ -69,8 +69,8 @@ class StockUsMACD(Base):
     macd9 = Column(Float)
     macd12 = Column(Float)
     macd26 = Column(Float)
-    macd_date = Column(String(20), primary_key=True)
+    macd_dt = Column(String(20))
     reg_date = Column(DateTime, default=func.now())
 
     # Composite primary key constraint
-    PrimaryKeyConstraint(sid, macd_date)
+    PrimaryKeyConstraint(sid, macd_dt)
